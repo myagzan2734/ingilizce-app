@@ -31,6 +31,8 @@ Tüm ilerleme ve profil bilgisi sadece kullanıcının cihazında, tarayıcını
 
 ## Yayınlama
 
+**Netlify:** Bu depoyu Netlify'a bağla (Add new site → Import an existing project → GitHub). Build komutu boş, yayın klasörü `/` olarak kalsın. Her `git push` sonrası site kendiliğinden güncellenir.
+
 **GitHub Pages:** Depo ayarlarında Settings → Pages → Branch: `main`, klasör: `/ (root)` seç. Site birkaç dakika içinde `https://KULLANICI-ADI.github.io/DEPO-ADI/` adresinde yayına girer.
 
 ## Güncelleme yaparken

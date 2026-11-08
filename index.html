@@ -231,6 +231,31 @@ h4.grp{color:var(--accent);margin:18px 0 8px}
 .flow h4{margin-top:0}
 .flowrow{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;padding:6px 0;border-bottom:1px solid var(--line);font-size:.9rem}
 .flowrow:last-child{border-bottom:0} .flowrow b{color:var(--accent)}
+.sb-hero{background:var(--card-back);color:var(--card-back-ink);border-radius:16px;padding:18px;margin-bottom:14px}
+.sb-hero h2{margin:6px 0 4px;font-size:1.5rem;font-weight:700;letter-spacing:-.01em}
+.sb-hero p{margin:0;opacity:.8;font-size:.9rem}
+.sb-tag{display:inline-block;font-size:.7rem;font-weight:600;letter-spacing:.06em;background:rgba(127,127,127,.25);border-radius:999px;padding:4px 10px}
+.seg{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:3px;margin:8px 0}
+.seg button{flex:1;font:inherit;font-size:.86rem;border:0;background:transparent;color:var(--muted);padding:8px 4px;border-radius:9px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);font-weight:500}
+.seg button:disabled{opacity:.35;cursor:not-allowed}
+.sb-grid{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.sb-col{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.sb-head{background:var(--card-back);color:var(--card-back-ink);font-size:.74rem;font-weight:600;letter-spacing:.04em;padding:7px 12px}
+.sb-col.acc .sb-head{background:var(--good);color:#fff}
+.sb-chips{display:flex;flex-wrap:wrap;gap:6px;padding:10px}
+.sb-chip{font:inherit;font-size:.92rem;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:7px 11px;cursor:pointer}
+.sb-chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:500}
+.sb-col.acc .sb-chip[aria-pressed="true"]{background:var(--good);border-color:var(--good);color:#fff}
+.sb-count{background:var(--accent-soft);border-radius:10px;padding:8px 12px;font-size:.8rem;color:var(--ink);margin-bottom:12px}
+.sb-res{background:var(--surface);border:2px solid var(--accent);border-radius:16px;padding:16px;margin-bottom:14px}
+.sb-line{display:flex;flex-wrap:wrap;gap:6px;align-items:baseline;font-size:1.35rem;font-weight:600;line-height:1.3}
+.sb-p{border-bottom:3px solid var(--line);padding-bottom:1px}
+.sb-p.p1{color:var(--good);border-color:var(--good)} .sb-p.p2{color:var(--accent);border-color:var(--accent)}
+.sb-end{margin-left:-6px}
+.sb-tr{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;color:var(--muted)}
+.sb-rule{margin:10px 0 2px;font-size:.85rem;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--bg);border-radius:8px;padding:6px 10px}
+@media (min-width:640px){.sb-grid{display:grid;grid-template-columns:repeat(5,1fr)} .sb-chips{flex-direction:column}}
 .exam-card{border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px;background:var(--surface)}
 .exam-card h3{margin:0 0 4px;font-size:1.05rem;font-weight:600}
 .score-line{font-weight:500;color:var(--good);margin:6px 0 10px}
@@ -267,6 +292,7 @@ fieldset.q-bad{border-color:var(--bad)}
     <button role="tab" data-view="bugun" aria-selected="true">Bugün</button>
     <button role="tab" data-view="ders" aria-selected="false">Ders</button>
     <button role="tab" data-view="sinav" aria-selected="false">Sınav</button>
+    <button role="tab" data-view="cumle" aria-selected="false">Cümle</button>
     <button role="tab" data-view="zaman" aria-selected="false">Zamanlar</button>
     <button role="tab" data-view="profil" aria-selected="false">Profil</button>
     <button role="tab" data-view="ayarlar" aria-selected="false">Ayarlar</button>
@@ -318,6 +344,10 @@ fieldset.q-bad{border-color:var(--bad)}
     <div class="lesson-top"><select id="lessonUnit" aria-label="Ünite seç"></select></div>
     <div class="sec-tabs" id="secTabs"></div>
     <div class="lesson" id="lessonBody"></div>
+  </section>
+
+  <section id="v-cumle" hidden>
+    <div id="sbBody"></div>
   </section>
 
   <section id="v-zaman" hidden>
@@ -1687,16 +1717,17 @@ document.addEventListener("keydown",e=>{
 });
 
 /* ---------- Görünümler ---------- */
-const VIEWS=["bugun","ders","sinav","zaman","profil","ayarlar"];
+const VIEWS=["bugun","ders","sinav","cumle","zaman","profil","ayarlar"];
 function show(v){
   if(!VIEWS.includes(v)) v="bugun";
   VIEWS.forEach(x=>q("#v-"+x).hidden = x!==v);
   document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.view===v));
-  q("#title").textContent = {bugun:"Bugünün kartları",ders:"Ders",sinav:"Sınavlar",zaman:"Zamanlar ve formüller",profil:"Profilim",ayarlar:"Ayarlar"}[v];
+  q("#title").textContent = {bugun:"Bugünün kartları",ders:"Ders",sinav:"Sınavlar",zaman:"Zamanlar ve formüller",cumle:"Cümle Makinesi",profil:"Profilim",ayarlar:"Ayarlar"}[v];
   if(v==="sinav" && q("#examBody").hidden) renderExamList();
   if(v==="profil"){renderProfile(); renderUnits();}
   if(v==="ders") renderLesson();
   if(v==="zaman") renderTenses();
+  if(v==="cumle") renderSB();
   if(v==="bugun") renderChecklist();
 }
 document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>{if(b.dataset.view==="ders"){lessonUnit=Math.min(UNITS.length-1,Math.floor(dayIndex()/7));lessonSec=sectionForToday()} show(b.dataset.view);try{history.replaceState(null,"","#"+b.dataset.view)}catch(e){}}));
@@ -2291,6 +2322,197 @@ function renderTenses(){
 
   const ts=el("section","lesson tsec"); ts.id="t-test"; ts.append(el("h3",null,"Karma test: doğru zamanı seç")); ts.append(el("p","lead","15 soru, bütün zamanlardan karışık."));
   ts.append(mcBlock(MIXQ)); box.append(ts);
+}
+
+/* ---------- Cümle Makinesi (5 kutu yöntemi) ---------- */
+const SB_SUBJ=[["I","Ben",0],["You","Sen",1],["He","O",2],["She","O",2],["We","Biz",3],["They","Onlar",4]];
+const SB_PACKS={
+ dil:{name:"Dil",verbs:[
+  {en:["speak","speaks","spoke","spoken","speaking"],tr:{stem:"konuş",aor:"konuşur"}},
+  {en:["learn","learns","learned","learned","learning"],tr:{stem:"öğren",aor:"öğrenir"}},
+  {en:["study","studies","studied","studied","studying"],tr:{stem:"çalış",aor:"çalışır"}},
+  {en:["practise","practises","practised","practised","practising"],tr:{stem:"pratik yap",aor:"pratik yapar"}},
+  {en:["use","uses","used","used","using"],tr:{stem:"kullan",aor:"kullanır"}}],
+  objs:[["English","İngilizce"],["Turkish","Türkçe"],["German","Almanca"],["Spanish","İspanyolca"],["French","Fransızca"]]},
+ yemek:{name:"Yemek",verbs:[
+  {en:["make","makes","made","made","making"],tr:{stem:"yap",aor:"yapar"}},
+  {en:["order","orders","ordered","ordered","ordering"],tr:{stem:"sipariş et",stemV:"sipariş ed",aor:"sipariş eder"}},
+  {en:["eat","eats","ate","eaten","eating"],tr:{stem:"ye",fut:"yiy",yor:"yiyor",aor:"yer"}},
+  {en:["buy","buys","bought","bought","buying"],tr:{stem:"al",aor:"alır"}},
+  {en:["bring","brings","brought","brought","bringing"],tr:{stem:"getir",aor:"getirir"}}],
+  objs:[["pizza","pizza"],["soup","çorba"],["pasta","makarna"],["salad","salata"],["a cake","kek"]]},
+ spor:{name:"Spor",verbs:[
+  {en:["play","plays","played","played","playing"],tr:{stem:"oyna",aor:"oynar"}},
+  {en:["watch","watches","watched","watched","watching"],tr:{stem:"izle",aor:"izler"}},
+  {en:["learn","learns","learned","learned","learning"],tr:{stem:"öğren",aor:"öğrenir"}},
+  {en:["teach","teaches","taught","taught","teaching"],tr:{stem:"öğret",aor:"öğretir"}},
+  {en:["practise","practises","practised","practised","practising"],tr:{stem:"çalış",aor:"çalışır"}}],
+  objs:[["football","futbol"],["tennis","tenis"],["basketball","basketbol"],["chess","satranç"],["volleyball","voleybol"]]},
+ seyahat:{name:"Seyahat",verbs:[
+  {en:["visit","visits","visited","visited","visiting"],tr:{stem:"ziyaret et",stemV:"ziyaret ed",aor:"ziyaret eder"}},
+  {en:["see","sees","saw","seen","seeing"],tr:{stem:"gör",aor:"görür"}},
+  {en:["explore","explores","explored","explored","exploring"],tr:{stem:"keşfet",stemV:"keşfed",aor:"keşfeder"}},
+  {en:["tour","tours","toured","toured","touring"],tr:{stem:"gez",aor:"gezer"}},
+  {en:["photograph","photographs","photographed","photographed","photographing"],tr:{stem:"fotoğrafla",aor:"fotoğraflar"}}],
+  objs:[["Istanbul","İstanbul'u"],["Paris","Paris'i"],["Rome","Roma'yı"],["the museum","müzeyi"],["the old town","eski şehri"]]}
+};
+const SB_HELP={
+ modal:[
+  {k:"can",lab:"can",tr:"-ebilir (yetenek, olasılık)",rule:"Özne + can + fiilin yalın hâli",times:"m"},
+  {k:"will",lab:"will",tr:"-ecek (gelecek, söz, karar)",rule:"Özne + will + fiilin yalın hâli",times:"m"},
+  {k:"should",lab:"should",tr:"-meli (tavsiye)",rule:"Özne + should + fiilin yalın hâli",times:"m"},
+  {k:"must",lab:"must",tr:"zorunda (olumsuzu: yasak)",rule:"Özne + must + fiilin yalın hâli",times:"m"},
+  {k:"might",lab:"might",tr:"belki (düşük olasılık)",rule:"Özne + might + fiilin yalın hâli",times:"m",noQ:true}],
+ tense:[
+  {k:"simple",lab:"do / does",tr:"geniş zaman: alışkanlık",rule:"Olumlu: Özne + V1 (he/she: V1+s) · Olumsuz/soru: do/does",times:"s"},
+  {k:"past",lab:"did",tr:"geçmiş: bitmiş olay",rule:"Olumlu: Özne + V2 · Olumsuz/soru: did + V1",times:"p"},
+  {k:"cont",lab:"am / is / are + -ing",tr:"şimdiki: şu an",rule:"Özne + am/is/are + V-ing",times:"c"},
+  {k:"going",lab:"going to",tr:"gelecek: plan",rule:"Özne + am/is/are + going to + V1",times:"g"},
+  {k:"perf",lab:"have / has + V3",tr:"present perfect: deneyim, sonuç",rule:"Özne + have/has + V3",times:"pp"}]
+};
+const SB_TIMES={
+ m:[["today","bugün"],["tomorrow","yarın"],["at home","evde"],["at work","işte"],["this week","bu hafta"]],
+ s:[["every day","her gün"],["at weekends","hafta sonları"],["on Mondays","pazartesileri"],["at home","evde"],["at work","işte"]],
+ p:[["yesterday","dün"],["last night","dün akşam"],["last week","geçen hafta"],["two days ago","iki gün önce"],["at home","evde"]],
+ c:[["now","şimdi"],["at the moment","şu anda"],["today","bugün"],["this week","bu hafta"],["at home","evde"]],
+ g:[["tomorrow","yarın"],["tonight","bu akşam"],["next week","gelecek hafta"],["this weekend","bu hafta sonu"],["next year","gelecek yıl"]],
+ pp:[["already","zaten"],["this week","bu hafta"],["this year","bu yıl"],["before","daha önce"],["many times","birçok kez"]]
+};
+/* Türkçe çekim yardımcıları */
+const TV="aeıioöuü";
+const lastV=s=>{for(let i=s.length-1;i>=0;i--) if(TV.includes(s[i])) return s[i]; return "e"};
+const A2=s=>"aıou".includes(lastV(s))?"a":"e";
+const I4=s=>({a:"ı",ı:"ı",e:"i",i:"i",o:"u",u:"u",ö:"ü",ü:"ü"})[lastV(s)];
+const vEnd=s=>TV.includes(s[s.length-1]);
+function pers1(form,p){ // -(y)Im, -sIn, -, -(y)Iz, -lAr
+  if(p===2) return form; if(p===4) return form+"l"+A2(form)+"r"; if(p===1) return form+"s"+I4(form)+"n";
+  let f=form; if(/(acak|ecek)$/.test(f)) f=f.slice(0,-1)+"ğ";
+  const v=I4(form); return f+(vEnd(form)?"y":"")+v+(p===0?"m":"z");
+}
+function pers2(form,p){return form+["m","n","","k","l"+A2(form)+"r"][p]}
+function q1(form3,p){
+  if(p===4){const f=form3+"l"+A2(form3)+"r"; return f+" m"+I4(f);}
+  const v=I4(form3); return form3+" m"+v+["y"+v+"m","s"+v+"n","","y"+v+"z"][p];
+}
+function negSpecial(base,p){ // base ends with -ma/-me: konuşma → konuşmam, konuşmazsın...
+  const a=A2(base), i=a==="a"?"ı":"i"; return base+["m","zs"+i+"n","z","y"+i+"z","zl"+a+"r"][p];
+}
+function trVerb(V,h,pol,p){
+  const st=V.stem, sv=V.stemV||st, fs=V.fut||sv, fsb=vEnd(fs)?fs+"y":fs;
+  const inf=st+"m"+A2(st)+"k";
+  const mali=st+"m"+A2(st)+"l"+I4(A2(st)), maliN=st+"m"+A2(st)+"m"+A2(st)+"l"+I4(A2(st));
+  const fut=fsb+A2(fs)+"c"+A2(fs)+"k", futN=st+"m"+A2(st)+"y"+A2(st)+"c"+A2(st)+"k";
+  const abil=fsb+A2(fs)+"bilir", abilNbase=fsb+A2(fs)+"m"+A2(fs);
+  const aor=V.aor, aorNbase=st+"m"+A2(st);
+  const D="çfhkpsşt".includes(st[st.length-1])?"t":"d";
+  const past=st+D+I4(st), pastN=st+"m"+A2(st)+"d"+I4(A2(st));
+  const yor=V.yor||(vEnd(st)?st.slice(0,-1)+I4(st.slice(0,-1)):sv+I4(sv))+"yor", yorN=st+"m"+I4(st)+"yor";
+  const P=(f)=>pol==="q"?q1(f,p):pers1(f,p);
+  switch(h){
+    case "can": return pol==="neg"?negSpecial(abilNbase,p):P(abil);
+    case "will": case "going": return pol==="neg"?pers1(futN,p):P(fut);
+    case "should": return pol==="neg"?pers1(maliN,p):P(mali);
+    case "must": if(pol==="neg") return pers1(maliN,p); if(pol==="q") return inf+" "+q1("zorunda",p); return inf+" "+pers1("zorunda",p);
+    case "might": return "belki|"+(pol==="neg"?negSpecial(aorNbase,p):pers1(aor,p));
+    case "simple": return pol==="neg"?negSpecial(aorNbase,p):P(aor);
+    case "past": case "perf": { if(pol==="neg") return pers2(pastN,p); const f=pers2(past,p); return pol==="q"?f+" m"+I4(f):f; }
+    case "cont": return pol==="neg"?pers1(yorN,p):P(yor);
+  }
+}
+function enSentence(sb){
+  const S=SB_SUBJ[sb.s], subj=S[0], p=S[2], third=p===2;
+  const V=sb.pack.verbs[sb.v].en, O=sb.pack.objs[sb.o][0], T=sb.times[sb.t][0], h=sb.help.k, pol=sb.pol;
+  const be=subj==="I"?"am":third?"is":"are", have=third?"has":"have";
+  const sl=subj==="I"?"I":subj.toLowerCase();
+  let parts;
+  const modalNeg={can:"can't",will:"won't",should:"shouldn't",must:"mustn't",might:"might not"};
+  if(sb.mode==="modal"){
+    if(pol==="q") parts=[h[0].toUpperCase()+h.slice(1),sl,V[0]];
+    else parts=[subj,pol==="neg"?modalNeg[h]:h,V[0]];
+  }else if(h==="simple"){
+    if(pol==="q") parts=[third?"Does":"Do",sl,V[0]]; else if(pol==="neg") parts=[subj,third?"doesn't":"don't",V[0]]; else parts=[subj,"",third?V[1]:V[0]];
+  }else if(h==="past"){
+    if(pol==="q") parts=["Did",sl,V[0]]; else if(pol==="neg") parts=[subj,"didn't",V[0]]; else parts=[subj,"",V[2]];
+  }else if(h==="cont"){
+    const bn=be==="am"?"am not":be==="is"?"isn't":"aren't";
+    if(pol==="q") parts=[be[0].toUpperCase()+be.slice(1),sl,V[4]]; else parts=[subj,pol==="neg"?bn:be,V[4]];
+  }else if(h==="going"){
+    const bn=be==="am"?"am not":be==="is"?"isn't":"aren't";
+    if(pol==="q") parts=[be[0].toUpperCase()+be.slice(1),sl,"going to "+V[0]]; else parts=[subj,(pol==="neg"?bn:be)+" going to",V[0]];
+  }else{
+    if(pol==="q") parts=[have[0].toUpperCase()+have.slice(1),sl,V[3]]; else parts=[subj,pol==="neg"?(third?"hasn't":"haven't"):have,V[3]];
+  }
+  return {parts:parts.concat([O,T]), text:parts.concat([O,T]).filter(Boolean).join(" ")+(pol==="q"?"?":".")};
+}
+function trSentence(sb){
+  const S=SB_SUBJ[sb.s], V=sb.pack.verbs[sb.v].tr, O=sb.pack.objs[sb.o][1], T=sb.times[sb.t][1];
+  let vf=trVerb(V,sb.help.k,sb.pol,S[2]), belki="";
+  if(vf.startsWith("belki|")){belki="belki "; vf=vf.slice(6);}
+  return S[1]+" "+belki+T+" "+O+" "+vf+(sb.pol==="q"?"?":".")+(sb.help.k==="must"&&sb.pol==="neg"?" (yasak)":"");
+}
+let SB={pk:"dil",mode:"modal",pol:"aff",s:0,h:0,v:0,o:0,t:0}, SBQ=null, sbScore={ok:0,all:0};
+function sbState(x){const pack=SB_PACKS[x.pk], help=SB_HELP[x.mode][x.h]; let times=SB_TIMES[help.times]; if(help.k==="perf"&&x.pol!=="aff") times=times.slice(1); return Object.assign({},x,{pack,help,times,t:Math.min(x.t,times.length-1)});}
+function renderSB(){
+  const box=q("#sbBody"); box.textContent="";
+  const hero=el("div","sb-hero"); hero.append(el("span","sb-tag","5 KUTU YÖNTEMİ"),el("h2",null,"Cümle Makinesi"),el("p",null,"Her kutudan bir seçenek seç, soldan sağa oku. Kutuları değiştirerek yüzlerce doğru cümle kur.")); box.append(hero);
+  // packs
+  const row1=el("div","sec-tabs"); Object.entries(SB_PACKS).forEach(([k,P])=>{const b=el("button",null,P.name); b.type="button"; b.setAttribute("aria-pressed",SB.pk===k); b.addEventListener("click",()=>{SB.pk=k;SB.v=0;SB.o=0;renderSB()}); row1.append(b)}); box.append(el("p","muted small","Konu"),row1);
+  const row2=el("div","seg"); [["modal","Yardımcı fiiller"],["tense","Zamanlar"]].forEach(([k,n])=>{const b=el("button",null,n); b.type="button"; b.setAttribute("aria-pressed",SB.mode===k); b.addEventListener("click",()=>{SB.mode=k;SB.h=0;SB.t=0;renderSB()}); row2.append(b)});
+  const row3=el("div","seg"); const st=sbState(SB);
+  [["aff","Olumlu"],["neg","Olumsuz"],["q","Soru"]].forEach(([k,n])=>{const b=el("button",null,n); b.type="button"; b.setAttribute("aria-pressed",SB.pol===k); if(k==="q"&&st.help.noQ){b.disabled=true; b.title="might ile soru pek kullanılmaz"} b.addEventListener("click",()=>{SB.pol=k;renderSB()}); row3.append(b)});
+  box.append(row2,row3);
+  const S=sbState(SB); SB.t=S.t;
+  const cols=[["1. KİM?",SB_SUBJ.map(x=>x[0]),"s"],["2. YARDIMCI",SB_HELP[SB.mode].map(x=>x.lab),"h"],["3. FİİL",S.pack.verbs.map(v=>v.en[0]),"v"],["4. NEYİ?",S.pack.objs.map(o=>o[0]),"o"],["5. NE ZAMAN / NEREDE?",S.times.map(t=>t[0]),"t"]];
+  const grid=el("div","sb-grid");
+  cols.forEach(([title,opts,key],ci)=>{
+    const c=el("div","sb-col"+(ci===1?" acc":"")); c.append(el("div","sb-head",title));
+    const ch=el("div","sb-chips");
+    opts.forEach((o,i)=>{const b=el("button","sb-chip",o); b.type="button"; b.setAttribute("aria-pressed",SB[key]===i); b.addEventListener("click",()=>{SB[key]=i; if(key==="h"){SB.t=0; if(SB_HELP[SB.mode][i].noQ&&SB.pol==="q") SB.pol="aff";} renderSB()}); ch.append(b)});
+    c.append(ch); grid.append(c);
+  });
+  box.append(grid);
+  const n=6*5*5*5*S.times.length;
+  box.append(el("div","sb-count",`6 kişi × 5 yardımcı × 5 fiil × 5 nesne × ${S.times.length} zaman = ${n.toLocaleString("tr-TR")} cümle · olumlu, olumsuz ve soruyla ×3`));
+  const E=enSentence(S), TR=trSentence(S);
+  const res=el("div","sb-res");
+  const line=el("div","sb-line");
+  E.parts.forEach((pt,i)=>{ if(!pt) return; const s=el("span","sb-p p"+i,pt); line.append(s); });
+  line.append(el("span","sb-end",SB.pol==="q"?"?":"."));
+  res.append(line);
+  const trw=el("div","sb-tr"); trw.append(el("span",null,TR),speakBtn(E.text,"Cümleyi dinle")); res.append(trw);
+  res.append(el("p","sb-rule",`Formül: ${S.help.rule}`));
+  res.append(el("p","muted small",`${S.help.lab}: ${S.help.tr}`));
+  const rr=el("div","btnrow"); const rnd=el("button","primary","🎲 Rastgele cümle"); rnd.type="button";
+  rnd.addEventListener("click",()=>{SB.s=Math.floor(Math.random()*6);SB.h=Math.floor(Math.random()*5);SB.v=Math.floor(Math.random()*5);SB.o=Math.floor(Math.random()*5);const pols=SB_HELP[SB.mode][SB.h].noQ?["aff","neg"]:["aff","neg","q"];SB.pol=pols[Math.floor(Math.random()*pols.length)];SB.t=Math.floor(Math.random()*5);renderSB();setTimeout(()=>speak(enSentence(sbState(SB)).text),150)});
+  rr.append(rnd); res.append(rr); box.append(res);
+  // 5 örnek: aynı kutularla olumlu/olumsuz/soru
+  const ex=el("div","lesson"); ex.append(el("h3",null,"Aynı kutular, üç biçim"));
+  ["aff","neg","q"].forEach(pl=>{ if(pl==="q"&&S.help.noQ) return; const s2=sbState(Object.assign({},SB,{pol:pl})); const e2=enSentence(s2); const r=el("div","vrow"); const t=el("div"); t.append(el("div","en",e2.text),el("div","exline",trSentence(s2))); r.append(t,speakBtn(e2.text)); ex.append(r)});
+  box.append(ex);
+  renderSBQuiz(box);
+}
+function renderSBQuiz(box){
+  const w=el("div","lesson sbq"); w.append(el("h3",null,"Kendini dene: Türkçeden kutuları kur"));
+  w.append(el("p","lead","Türkçe cümleyi oku, yukarıdaki kutulardan doğru seçenekleri işaretle ve kontrol et. Biçim (olumlu, olumsuz, soru) ve kalıp sana verilir."));
+  const nb=el("button","primary",SBQ?"Yeni soru":"Soru getir"); nb.type="button";
+  nb.addEventListener("click",()=>{const mode=SB.mode, h=Math.floor(Math.random()*5), noQ=SB_HELP[mode][h].noQ; const pols=noQ?["aff","neg"]:["aff","neg","q"];
+    SBQ={pk:SB.pk,mode,h,pol:pols[Math.floor(Math.random()*pols.length)],s:Math.floor(Math.random()*6),v:Math.floor(Math.random()*5),o:Math.floor(Math.random()*5),t:Math.floor(Math.random()*5)};
+    SBQ=sbState(SBQ); SB.pol=SBQ.pol; SB.mode=mode; renderSB(); setTimeout(()=>{const t=document.querySelector(".sbq"); if(t&&t.scrollIntoView) t.scrollIntoView({behavior:"smooth",block:"center"})},50)});
+  w.append(nb);
+  if(SBQ){
+    w.append(el("div","pprompt",trSentence(SBQ)));
+    w.append(el("p","muted small",`Biçim: ${({aff:"olumlu",neg:"olumsuz",q:"soru"})[SBQ.pol]} · Kutuları seçip kontrol et.`));
+    const fb=el("p","pfb");
+    const ck=el("button","primary","Kontrol et"); ck.type="button";
+    ck.addEventListener("click",()=>{const cur=sbState(SB); const mine=enSentence(cur).text, target=enSentence(SBQ).text;
+      const alt=SB_SUBJ[SBQ.s][2]===2? enSentence(Object.assign({},SBQ,{s:SBQ.s===2?3:2})).text : null;
+      const ok=SB.pk===SBQ.pk && SB.mode===SBQ.mode && (mine===target||mine===alt);
+      sbScore.all++; if(ok){sbScore.ok++; fb.className="pfb good"; fb.textContent="Doğru! "+target; if(typeof addXp==="function"){addXp(1); if(typeof logAct==="function") logAct("p",1); save();}} else {fb.className="pfb bad"; fb.textContent="Doğrusu: "+target+(alt?` (ya da ${alt})`:"");}
+      sc.textContent=`Skor: ${sbScore.ok} / ${sbScore.all}`; speak(target)});
+    const sc=el("p","muted small",`Skor: ${sbScore.ok} / ${sbScore.all}`);
+    w.append(ck,fb,sc);
+  }
+  box.append(w);
 }
 
 /* ---------- Sınavlar (özgün sorular, kitabın ünite konularına göre) ---------- */
